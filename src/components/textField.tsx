@@ -2,18 +2,21 @@ interface TextFieldProps {
   containerStyle?: string;
   textFieldStyle?: string;
   inputStyle?: string;
-  placeholder: string;
+  placeholder?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
 }
 
 export function TextField(props: TextFieldProps) {
-  const { containerStyle, textFieldStyle, inputStyle, placeholder } = props;
+  const { containerStyle, textFieldStyle, inputStyle, placeholder = "",onChange, type="text"} = props;
   return (
     <div className={`p-1 ${containerStyle}`}>
-      <div className={`border border-black rounded-full ${textFieldStyle}`}>
+      <div className={`border border-black rounded-sm ${textFieldStyle}`}>
         <input
-          type="text"
+          type={type}
           className={`w-52 h-8 p-2 text-black focus:ring-2 focus:ring-transparent outline-none ${inputStyle}`}
           placeholder={placeholder}
+          onChange={onChange}
         />
       </div>
     </div>
