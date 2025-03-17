@@ -8,7 +8,7 @@ export function NavBar() {
 
   return (
     <div className="flex justify-center items-center bg-gray-100 p-4 fixed top-0 w-full z-10">
-      <div className="flex space-x-4 border-b-2 border-b-blue-400 w-80 items-center justify-evenly text-lg">
+      <div className="flex space-x-4 border-b-2 border-b-blue-400 w-96 items-center justify-evenly text-lg">
         <p className={pStyles} onClick={() => navigate("/")}>
           Home
         </p>
