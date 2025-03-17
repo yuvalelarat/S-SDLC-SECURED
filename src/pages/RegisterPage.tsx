@@ -3,12 +3,14 @@ import { TextField } from "../components/textField";
 import { WhiteCard } from "../components/whiteCard";
 import { validatePassword } from "../auth/validatePassword";
 import { validateEmail } from "../auth/validateEmail";
+import { useNavigate } from "react-router-dom";
 
-export function RegisterPage() {
+export default function RegisterPage() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ export function RegisterPage() {
 
     setError(null);
 
-    const response = await fetch("/api/register", {
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -81,6 +83,16 @@ export function RegisterPage() {
           Register
         </button>
       </form>
+      <div className="flex justify-center items-center pt-3">
+        <div className="hover:cursor-pointer p-1">
+          <p
+            className="text-blue-500 text-sm"
+            onClick={() => navigate("/forgot-password")}
+          >
+            Want to change password? click here!
+          </p>
+        </div>
+      </div>
     </WhiteCard>
   );
 }
