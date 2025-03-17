@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { NavBar } from "./components/navBar";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import HomePage from "./pages/homePage";
+import HomePage from "./pages/HomePage";
 import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
