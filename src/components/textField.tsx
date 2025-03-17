@@ -8,9 +8,16 @@ interface TextFieldProps {
 }
 
 export function TextField(props: TextFieldProps) {
-  const { containerStyle, textFieldStyle, inputStyle, placeholder = "",onChange, type="text"} = props;
+  const {
+    containerStyle,
+    textFieldStyle,
+    inputStyle,
+    placeholder = "",
+    onChange,
+    type = "text",
+  } = props;
   return (
-    <div className={`p-1 ${containerStyle}`}>
+    <div className={` ${containerStyle}`}>
       <div className={`border border-black rounded-sm ${textFieldStyle}`}>
         <input
           type={type}
