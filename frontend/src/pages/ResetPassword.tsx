@@ -1,45 +1,33 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { TextField } from "../components/textField";
 import { WhiteCard } from "../components/whiteCard";
-import { validateEmail } from "../auth/validateEmail";
 
-export default function ForgotPassword() {
+export default function ResetPassword() {
+  const [oldPassword, setOldPassword] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateEmail(email)) {
-      setError("Invalid email format.");
-      return;
-    }
-
-    setError(null);
-
-    //   const response = await fetch("/api/auth/forgot-password", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ email }),
-    //   });
-    //   if (response.ok) {
-    //   } else {
-    //   }
-  };
 
   return (
     <WhiteCard>
       <h2 className="text-2xl font-bold pb-4 text-black">Reset password</h2>
       <form>
-        <div className={error ? "pt-4" : "py-4"}>
+        <div className="py-4">
           <TextField
-            placeholder="Email"
+            placeholder="Old Password"
             containerStyle="mb-4"
             textFieldStyle="mb-4"
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
+            onChange={(e) => setOldPassword(e.target.value)}
+            type="password"
+          />
+        </div>
+        <div className={error ? "pt-4" : "py-4"}>
+          <TextField
+            placeholder="New Password"
+            containerStyle="mb-4"
+            textFieldStyle="mb-4"
+            onChange={(e) => setNewPassword(e.target.value)}
+            type="password"
           />
           <div className="min-h-5 pb-4">
             {<p className="text-red-500 text-sm">{`${error ? error : ""}`}</p>}
@@ -48,9 +36,8 @@ export default function ForgotPassword() {
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer"
-          onClick={handleSubmit}
         >
-          Submit
+          Change password
         </button>
       </form>
     </WhiteCard>
