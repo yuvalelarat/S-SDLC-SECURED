@@ -10,6 +10,13 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!username || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    setError(null);
+
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
@@ -37,8 +44,10 @@ export default function LoginPage() {
         <div className={error ? "pt-4" : "py-4"}>
           <TextField
             placeholder="Password"
-            type="password"
+            containerStyle="mb-4"
+            textFieldStyle="mb-4"
             onChange={(e) => setPassword(e.target.value)}
+            type="password"
           />
           <div className="min-h-5 pb-4">
             {<p className="text-red-500 text-sm">{`${error ? error : ""}`}</p>}
@@ -46,7 +55,7 @@ export default function LoginPage() {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:cursor-pointer"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer"
           onClick={handleLogin}
         >
           Login

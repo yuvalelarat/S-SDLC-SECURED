@@ -21,7 +21,7 @@ export function TextField(props: TextFieldProps) {
       <div className={`border border-black rounded-sm ${textFieldStyle}`}>
         <input
           type={type}
-          className={`w-52 h-8 p-2 text-black focus:ring-2 focus:ring-transparent outline-none ${inputStyle}`}
+          className={`w-full h-8 p-2 text-black focus:ring-2 focus:ring-transparent outline-none ${inputStyle}`}
           placeholder={placeholder}
           onChange={onChange}
         />

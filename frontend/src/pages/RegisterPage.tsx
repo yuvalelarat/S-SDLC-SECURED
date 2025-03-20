@@ -89,7 +89,7 @@ export default function RegisterPage() {
             className="text-blue-500 text-sm"
             onClick={() => navigate("/forgot-password")}
           >
-            Want to change password? click here!
+            Forgot password? click here!
           </p>
         </div>
       </div>
