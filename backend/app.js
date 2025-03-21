@@ -9,7 +9,6 @@ dotenv.config();
 
 const port = process.env.PORT || 3000;
 
-// Use routes
 app.use("/api/auth", authRouter);
 
 AppDataSource.initialize()
