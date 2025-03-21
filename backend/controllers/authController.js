@@ -5,13 +5,13 @@ export const login = (req, res) => {
 };
 
 export const register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { userName, email, password } = req.body;
 
-  if (!username || !email || !password) {
+  if (!userName || !email || !password) {
     return res.status(400).json({ message: "Please fill in all fields" });
   }
 
-  const result = await registerService(username, email, password);
+  const result = await registerService(userName, email, password);
 
   res.status(result.status).json({ message: result.message });
 };

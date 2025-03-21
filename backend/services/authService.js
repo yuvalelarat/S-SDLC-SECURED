@@ -11,14 +11,14 @@ export async function registerService(userName, email, password) {
         return { status: 400, message: "Email already exists" };
         }
 
-        const nonUniqueUserName = await userRepository.findOne({ where: { username: userName } });
+        const nonUniqueUserName = await userRepository.findOne({ where: { userName } });
         
         if (nonUniqueUserName) {
-        return { status: 400, message: "user name already exists" };
+        return { status: 400, message: "Username already exists" };
         }
     
         const newUser = userRepository.create({
-        username: userName,
+            userName: userName,
         email,
         password,
         });

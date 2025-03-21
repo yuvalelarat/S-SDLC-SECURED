@@ -9,7 +9,7 @@ const User = new EntitySchema({
       type: "int",
       generated: true,
     },
-    username: {
+    userName: {
       type: "varchar",
       length: 255,
       unique: true,
