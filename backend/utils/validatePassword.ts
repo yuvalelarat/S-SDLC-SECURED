@@ -1,6 +1,6 @@
 import { passwordConfig } from "./passwordConfig";
 
-export const validatePassword = (password: string) => {
+export const validatePassword = (password) => {
   const { password_length, password_complexity, dictionary_protection } =
     passwordConfig;
 
