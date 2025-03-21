@@ -1,15 +1,22 @@
 import express from "express";
 import authRouter from "./routes/auth.js";
+import { AppDataSource } from "./config/data-source.js";
+import dotenv from "dotenv";
 
-const app = express(); //using express
+const app = express();
 app.use(express.json());
+dotenv.config();
 
-//define a port number and giving us console log messages
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-//using routs
 app.use("/api/auth", authRouter);
 
+AppDataSource.initialize()
+  .then(() => {
+    console.log("Database connected successfully!");
+  })
+  .catch((error) => console.error("Database connection error:", error));
+
 app.listen(port, () => {
-  console.log(`listening on port ${port}`);
+  console.log(`Listening on port ${port}`);
 });
