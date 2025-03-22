@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { TextField } from "../components/textField";
 import { WhiteCard } from "../components/whiteCard";
-import { validatePassword } from "../auth/validatePassword";
-import { validateEmail } from "../auth/validateEmail";
 import { useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {
-  const [username, setUsername] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -15,30 +13,18 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateEmail(email)) {
-      setError("Invalid email format.");
-      return;
-    }
-
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      setError(passwordError);
-      return;
-    }
-
-    setError(null);
-
-    const response = await fetch("/api/auth/register", {
+    const response = await fetch("http://localhost:3000/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, password, email }),
+      body: JSON.stringify({ userName, password, email }),
     });
     if (response.ok) {
-      // Handle successful registration
+      navigate("/login");
     } else {
-      // Handle registration error
+      const errorData = await response.json();
+      setError(errorData.message || "Registration failed.");
     }
   };
 
@@ -60,7 +46,7 @@ export default function RegisterPage() {
             placeholder="Username"
             containerStyle="mb-4"
             textFieldStyle="mb-4"
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUserName(e.target.value)}
           />
         </div>
         <div className={error ? "pt-4" : "py-4"}>
@@ -83,16 +69,6 @@ export default function RegisterPage() {
           Register
         </button>
       </form>
-      <div className="flex justify-center items-center pt-3">
-        <div className="hover:cursor-pointer p-1">
-          <p
-            className="text-blue-500 text-sm"
-            onClick={() => navigate("/forgot-password")}
-          >
-            Forgot password? click here!
-          </p>
-        </div>
-      </div>
     </WhiteCard>
   );
 }

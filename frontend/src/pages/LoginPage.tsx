@@ -1,33 +1,39 @@
 import { useState } from "react";
 import { TextField } from "../components/textField";
 import { WhiteCard } from "../components/whiteCard";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    if (!userName || !password) {
       setError("Please fill in all fields.");
       return;
     }
 
     setError(null);
 
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ userName, password }),
     });
     if (response.ok) {
-      // Handle successful login
+      const responseBody = await response.json();
+      const token = responseBody.token;
+      localStorage.setItem("token", token);
+      navigate("/");
     } else {
-      // Handle login error
+      const errorData = await response.json();
+      setError(errorData.message || "Login failed.");
     }
   };
 
@@ -38,7 +44,7 @@ export default function LoginPage() {
         <div className="py-4">
           <TextField
             placeholder="Username"
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUserName(e.target.value)}
           />
         </div>
         <div className={error ? "pt-4" : "py-4"}>
@@ -61,6 +67,16 @@ export default function LoginPage() {
           Login
         </button>
       </form>
+      <div className="flex justify-center items-center pt-3">
+        <div className="hover:cursor-pointer p-1">
+          <p
+            className="text-blue-500 text-sm"
+            onClick={() => navigate("/forgot-password")}
+          >
+            Forgot password? click here!
+          </p>
+        </div>
+      </div>
     </WhiteCard>
   );
 }
