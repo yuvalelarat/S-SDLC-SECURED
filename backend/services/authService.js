@@ -10,7 +10,7 @@ export async function loginService(userName, password) {
         const user = await userRepository.findOne({ where: { userName } });
 
         if (!user) {
-            return { status: 404, message: "User not found" };
+            return { status: 404, message: "Invalid username or password" };
         }
 
         const hashedPassword = createHmac("sha256", user.salt)
@@ -18,7 +18,7 @@ export async function loginService(userName, password) {
             .digest("hex");
 
         if (hashedPassword !== user.password) {
-            return { status: 400, message: "Invalid email or password" };
+            return { status: 400, message: "Invalid username or password" };
         }
 
         const token = generateToken(user);
