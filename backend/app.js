@@ -2,6 +2,7 @@ import express from "express";
 import authRouter from "./routes/auth.js";
 import { AppDataSource } from "./config/data-source.js";
 import dotenv from "dotenv";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
