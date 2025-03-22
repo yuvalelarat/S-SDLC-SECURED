@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { TextField } from "../components/textField";
 import { WhiteCard } from "../components/whiteCard";
 import { validateEmail } from "../auth/validateEmail";
+import { useNavigate } from "react-router-dom";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +30,22 @@ export default function ForgotPassword() {
     //   } else {
     //   }
   };
+
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    return (
+      <WhiteCard>
+        <h2 className="text-2xl font-bold pb-4 text-black text-center">You are already logged in!</h2>
+        <p
+          className="text-blue-500 text-md text-center hover:cursor-pointer p-1"
+          onClick={() => navigate("/")}
+        >
+          Go to home page.
+        </p>
+      </WhiteCard>
+    );
+  }
 
   return (
     <WhiteCard>

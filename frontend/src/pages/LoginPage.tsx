@@ -37,6 +37,22 @@ export default function LoginPage() {
     }
   };
 
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    return (
+      <WhiteCard>
+        <h2 className="text-2xl font-bold pb-4 text-black text-center">You are already logged in!</h2>
+        <p
+          className="text-blue-500 text-md text-center hover:cursor-pointer p-1"
+          onClick={() => navigate("/")}
+        >
+          Go to home page.
+        </p>
+      </WhiteCard>
+    );
+  }
+
   return (
     <WhiteCard>
       <h2 className="text-2xl font-bold pb-4 text-black">Login</h2>

@@ -9,15 +9,9 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div>
-      <p>TEST</p>
-      <p>TEST</p>
-      <p>TEST</p>
-      <p>TEST</p>
-      <p>TEST</p>
-      <p>TEST</p>
-      <p>TEST</p>
-      <p>{token ? `Token: ${token}` : "No token found"}</p>
+    <div className="mt-20 justify-center items-center flex flex-col">
+      <h1 className="text-4xl font-bold">Comunication_LTD </h1>
+      {token ? <p>{`Token: ${token}`}</p> : <p>Please login to continue.</p>}
     </div>
   );
 }

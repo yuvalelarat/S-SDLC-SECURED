@@ -1,12 +1,30 @@
 import { useState } from "react";
 import { TextField } from "../components/textField";
 import { WhiteCard } from "../components/whiteCard";
+import { useNavigate } from "react-router-dom";
 
 export default function ResetPassword() {
   const [oldPassword, setOldPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return (
+      <WhiteCard>
+        <h2 className="text-2xl font-bold pb-4 text-black text-center">Please login to access this page.</h2>
+        <p
+          className="text-blue-500 text-md text-center hover:cursor-pointer p-1"
+          onClick={() => navigate("/login")}
+        >
+          Go to login.
+        </p>
+      </WhiteCard>
+    );
+  }
 
   return (
     <WhiteCard>
