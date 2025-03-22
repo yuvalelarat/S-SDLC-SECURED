@@ -1,4 +1,4 @@
-import { passwordConfig } from "./passwordConfig";
+import { passwordConfig } from "./passwordConfig.js";
 
 export const validatePassword = (password) => {
   const { password_length, password_complexity, dictionary_protection } =
