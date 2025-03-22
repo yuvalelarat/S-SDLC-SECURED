@@ -23,6 +23,10 @@ const User = new EntitySchema({
       type: "varchar",
       length: 255,
     },
+    salt: {
+      type: "varchar",
+      length: 255,
+    },
   },
 });
 
