@@ -13,7 +13,7 @@ export const register = async (req, res) => {
 
   const result = await registerService(userName, email, password);
 
-  res.status(result.status).json({ message: result.message });
+  res.status(result.status).json(result);
 };
 
 export const forgotPassword = (req, res) => {

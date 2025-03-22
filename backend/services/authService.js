@@ -18,7 +18,7 @@ export async function registerService(userName, email, password) {
         }
     
         const newUser = userRepository.create({
-            userName: userName,
+        userName,
         email,
         password,
         });
