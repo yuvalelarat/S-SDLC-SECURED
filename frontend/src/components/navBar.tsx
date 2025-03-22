@@ -25,7 +25,7 @@ export function NavBar() {
   };
 
   const resetPasswordNav = () => {
-    if (token) navigate("/register");
+    if (token) navigate("/reset-password");
     else {
       navigate("/login");
     }
