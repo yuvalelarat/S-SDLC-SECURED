@@ -53,7 +53,7 @@ export async function registerService(userName, email, password) {
             userName,
             email,
             password: hashedPassword,
-            salt, // Save the salt in the newUser
+            salt,
         });
 
         await userRepository.save(newUser);
