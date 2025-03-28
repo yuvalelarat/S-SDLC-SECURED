@@ -1,4 +1,4 @@
-import { createHmac, randomBytes } from "crypto";
+import bcrypt from "bcrypt";
 import { AppDataSource } from "../config/data-source.js";
 import User from "../models/userModel.js";
 import { generateToken } from "../utils/JWTutils.js";
@@ -13,18 +13,15 @@ export async function loginService(userName, password) {
             return { status: 404, message: "Invalid username or password" };
         }
 
-        const hashedPassword = createHmac("sha256", user.salt)
-            .update(password)
-            .digest("hex");
+        const isPasswordValid = await bcrypt.compare(password, user.password);
 
-        if (hashedPassword !== user.password) {
+        if (!isPasswordValid) {
             return { status: 400, message: "Invalid username or password" };
         }
 
         const token = generateToken(user);
 
         return { status: 200, message: "Login successful", token };
-
 
     } catch (error) {
         console.error(error);
@@ -48,11 +45,9 @@ export async function registerService(userName, email, password) {
             return { status: 400, message: "Username already exists" };
         }
 
-        const salt = randomBytes(16).toString("hex");
-
-        const hashedPassword = createHmac("sha256", salt)
-            .update(password)
-            .digest("hex");
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = userRepository.create({
             userName,
