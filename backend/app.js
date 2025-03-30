@@ -1,5 +1,6 @@
 import express from "express";
 import authRouter from "./routes/auth.js";
+import clientRouter from "./routes/clients.js";
 import { AppDataSource } from "./config/data-source.js";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -14,6 +15,7 @@ app.use(cors());
 const port = process.env.PORT || 3000;
 
 app.use("/api/auth", authRouter);
+app.use("/api/clients", clientRouter);
 
 AppDataSource.initialize()
   .then(() => {
