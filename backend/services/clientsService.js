@@ -26,3 +26,15 @@ export async function createClientService(clientData) {
         return { status: 500, message: "Internal Server Error", error: error.message };
     }  
 }
+
+
+export async function getAllClientsService() {
+    try {
+        const clientRepository = AppDataSource.getRepository(Client);
+        const clients = await clientRepository.find();
+        return { status: 200, message: "Clients retrieved successfully", clients };
+    } catch (error) {
+        console.error(error);
+        return { status: 500, message: "Internal Server Error", error: error.message };
+    }
+}

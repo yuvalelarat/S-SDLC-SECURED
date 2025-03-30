@@ -1,8 +1,9 @@
 import { validateEmail } from "../utils/validateEmail.js";
-import { createClientService } from "../services/clientsService.js";
+import { createClientService,getAllClientsService } from "../services/clientsService.js";
 
-export function getAllClients(req, res) {
-    res.send("getAllClients");
+export async function getAllClients(req, res) {
+    const result = await getAllClientsService();
+    res.status(result.status).json(result);
 }
 
 export async function createClient(req, res) {
