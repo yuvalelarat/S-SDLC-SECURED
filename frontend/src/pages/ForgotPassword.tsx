@@ -12,23 +12,37 @@ export default function ForgotPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log(`[ForgotPassword] Submitting email: ${email}`);
+
     if (!validateEmail(email)) {
+      console.error('[ForgotPassword] Invalid email format.');
       setError("Invalid email format.");
       return;
     }
 
     setError(null);
 
-    //   const response = await fetch("/api/auth/forgot-password", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ email }),
-    //   });
-    //   if (response.ok) {
-    //   } else {
-    //   }
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        console.log(`[ForgotPassword] Reset token sent successfully to email: ${email}`);
+        alert("Reset token sent to your email.");
+      } else {
+        const errorData = await response.json();
+        console.error(`[ForgotPassword] Failed to send reset token: ${errorData.message}`);
+        setError(errorData.message || "Failed to send reset token.");
+      }
+    } catch (err) {
+      console.error('[ForgotPassword] An error occurred while sending reset token:', err);
+      setError("An error occurred. Please try again.");
+    }
   };
 
   const token = localStorage.getItem("token");
