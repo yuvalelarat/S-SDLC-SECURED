@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 export default function ResetPassword() {
   const [oldPassword, setOldPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
-  const userName = localStorage.getItem("userName") || "";
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -33,8 +32,9 @@ export default function ResetPassword() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ userName, oldPassword, newPassword }),
+        body: JSON.stringify({ oldPassword, newPassword }),
       });
       if (response.ok) {
         alert("Password reset successfully.");
