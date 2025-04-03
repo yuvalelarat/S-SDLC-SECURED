@@ -30,6 +30,7 @@ export default function LoginPage() {
       const responseBody = await response.json();
       const token = responseBody.token;
       localStorage.setItem("token", token);
+      localStorage.setItem("userName", userName);
       navigate("/");
     } else {
       const errorData = await response.json();
