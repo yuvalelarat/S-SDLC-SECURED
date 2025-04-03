@@ -2,6 +2,8 @@ import { registerService, loginService, resetPasswordService } from "../services
 import { validatePassword } from "../utils/validatePassword.js";
 import { validateEmail } from "../utils/validateEmail.js";
 import { decodeToken } from "../utils/JWTutils.js";
+import { sendEmail } from "../utils/sendEmail.js";
+import crypto from "crypto";
 
 export const login = async (req, res) => {
   const { userName, password } = req.body;
@@ -40,14 +42,31 @@ export const register = async (req, res) => {
 };
 
 export const forgotPassword = (req, res) => {
-  res.send("forgot-password");
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Please fill in all fields" });
+  }
+
+  const isEmailOk = validateEmail(email);
+
+  if (!isEmailOk) {
+    return res.status(400).json({ message: "Email is not valid." });
+  }
+
+  const tempPass = crypto.createHash("sha1").update(email).digest("hex");
+  sendEmail(email, tempPass)
+    .then(() => {
+      res.status(200).json({ message: "Password reset email sent successfully." });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Failed to send password reset email.", error });
+    });
 };
 
 export const resetPassword = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  console.log("token", token);
   
-
   if (!token) {
       return res.status(401).json({ message: "Unauthorized - No Token Provided" });
   }
@@ -62,8 +81,7 @@ export const resetPassword = async (req, res) => {
   if (!userName) {
       return res.status(401).json({ message: "Unauthorized - Invalid Token" });
   }
-  console.log("userName", userName);
-  
+
   const {oldPassword, newPassword} = req.body;
 
   if (!oldPassword || !newPassword) {

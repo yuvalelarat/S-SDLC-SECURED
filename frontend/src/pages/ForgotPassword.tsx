@@ -12,10 +12,7 @@ export default function ForgotPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log(`[ForgotPassword] Submitting email: ${email}`);
-
     if (!validateEmail(email)) {
-      console.error('[ForgotPassword] Invalid email format.');
       setError("Invalid email format.");
       return;
     }
@@ -36,7 +33,6 @@ export default function ForgotPassword() {
         alert("Reset token sent to your email.");
       } else {
         const errorData = await response.json();
-        console.error(`[ForgotPassword] Failed to send reset token: ${errorData.message}`);
         setError(errorData.message || "Failed to send reset token.");
       }
     } catch (err) {
