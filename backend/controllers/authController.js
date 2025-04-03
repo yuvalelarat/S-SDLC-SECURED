@@ -1,4 +1,4 @@
-import { registerService, loginService } from "../services/authService.js";
+import { registerService, loginService, resetPasswordService } from "../services/authService.js";
 import { validatePassword } from "../utils/validatePassword.js";
 import { validateEmail } from "../utils/validateEmail.js";
 
@@ -42,6 +42,8 @@ export const forgotPassword = (req, res) => {
   res.send("forgot-password");
 };
 
-export const resetPassword = (req, res) => {
-  res.send("reset-password");
+export const resetPassword = async (req, res) => {
+  const {userName,oldPassword, newPassword} = req.body;
+  const result = await resetPasswordService(userName,oldPassword, newPassword);
+  res.status(result.status).json(result);
 };
