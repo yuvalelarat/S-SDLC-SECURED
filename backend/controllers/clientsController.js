@@ -4,7 +4,8 @@ import { createClientService, getAllClientsService } from "../services/clientsSe
 export async function getAllClients(req, res) {
     try {
         const token = req.headers.authorization?.split(" ")[1];
-
+        console.log("token", token);
+        
         if (!token) {
             return res.status(401).json({ message: "Unauthorized - No Token Provided" });
         }

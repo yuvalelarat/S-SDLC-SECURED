@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 export default function ResetPassword() {
   const [oldPassword, setOldPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -26,10 +25,30 @@ export default function ResetPassword() {
     );
   }
 
+  const handleReset = async (e: React.FormEvent) => {
+      e.preventDefault();
+  
+      const response = await fetch("http://localhost:3000/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+      if (response.ok) {
+        alert("Password reset successfully.");
+        navigate("/");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Resetting failed.");
+      }
+    };
+
   return (
     <WhiteCard>
       <h2 className="text-2xl font-bold pb-4 text-black">Reset password</h2>
-      <form>
+      <form onSubmit={handleReset}>
         <div className="py-4">
           <TextField
             placeholder="Old Password"
@@ -53,8 +72,7 @@ export default function ResetPassword() {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer"
-        >
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer">
           Change password
         </button>
       </form>
