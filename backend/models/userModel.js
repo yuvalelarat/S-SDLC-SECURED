@@ -27,6 +27,11 @@ const User = new EntitySchema({
       type: "varchar",
       length: 255,
     },
+    tempPass: {
+      type: "varchar",
+      length: 255,
+      nullable: true,
+    },
   },
 });
 

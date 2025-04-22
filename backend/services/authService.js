@@ -66,7 +66,7 @@ export async function registerService(userName, email, password) {
     }
 }
 
-export async function resetPasswordService(userName,oldPassword,newPassword) {
+export async function resetPasswordService(userName, oldPassword, newPassword) {
     if (oldPassword === newPassword) {
         return { status: 400, message: "New password cannot be the same as the old password" };
     }
@@ -90,10 +90,59 @@ export async function resetPasswordService(userName,oldPassword,newPassword) {
 
         user.password = hashedPassword;
         user.salt = salt;
+        user.tempPass = null;
 
         await userRepository.save(user);
 
         return { status: 200, message: "Password changed successfully" };
+    } catch (error) {
+        console.error(error);
+        return { status: 500, message: "Internal Server Error", error: error.message };
+    }
+}
+
+export async function saveTempPassword(tempPass, email) {
+    if (tempPass === null || email === undefined) {
+        return { status: 400, message: "fields cannot be null" };
+    }
+
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({ where: { email } });
+
+        if (!user) {
+            return { status: 404, message: "User not found" };
+        }
+
+        user.tempPass = tempPass;
+
+        await userRepository.save(user);
+
+        return { status: 200, message: "Temp password saved successfully" };
+    } catch (error) {
+        console.error(error);
+        return { status: 500, message: "Internal Server Error", error: error.message };
+    }
+}
+
+export async function checkTempPassword(tempPass, email) {
+    if (tempPass === null || email === null) {
+        return { status: 400, message: "fields cannot be null" };
+    }
+
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({ where: { email } });
+
+        if (!user) {
+            return { status: 404, message: "User not found" };
+        }
+
+        if (user.tempPass !== tempPass) {
+            return { status: 400, message: "Invalid temporary password" };
+        }
+
+        return { status: 200, message: "Temporary password is valid" };
     } catch (error) {
         console.error(error);
         return { status: 500, message: "Internal Server Error", error: error.message };
