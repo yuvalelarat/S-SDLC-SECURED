@@ -101,7 +101,7 @@ export async function resetPasswordService(userName, oldPassword, newPassword) {
     }
 }
 
-export async function saveTempPassword(tempPass, email) {
+export async function saveTempPasswordService(tempPass, email) {
     if (tempPass === null || email === undefined) {
         return { status: 400, message: "fields cannot be null" };
     }
@@ -125,7 +125,7 @@ export async function saveTempPassword(tempPass, email) {
     }
 }
 
-export async function checkTempPassword(tempPass, email) {
+export async function checkTempPasswordService(tempPass, email) {
     if (tempPass === null || email === null) {
         return { status: 400, message: "fields cannot be null" };
     }
