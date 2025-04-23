@@ -11,6 +11,8 @@ router.post("/forgot-password", authController.forgotPassword);
 
 router.post("/reset-password", authController.resetPassword);
 
-router.post("check-temp-password", authController.checkTempPassword);
+router.post("/reset-password-no-token", authController.resetPasswordWithoutToken)
+
+router.post("/check-temp-password", authController.checkTempPassword);
 
 export default router;

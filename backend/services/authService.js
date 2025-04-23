@@ -101,6 +101,43 @@ export async function resetPasswordService(userName, oldPassword, newPassword) {
     }
 }
 
+export async function resetPasswordNoTokenService(email, newPassword) {
+    const validationResult = validatePassword(newPassword);
+    if (validationResult !== null) {
+        return { status: 400, message: validationResult };
+    }
+
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({ where: { email } });
+
+        if (!user) {
+            return { status: 404, message: "User not found" };
+        }
+
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+
+        if (isSamePassword) {
+            return { status: 400, message: "New password cannot be the same as the old password" };
+        }
+
+        user.password = hashedPassword;
+        user.salt = salt;
+        user.tempPass = null;
+
+        await userRepository.save(user);
+
+        return { status: 200, message: "Password changed successfully" };
+    } catch (error) {
+        console.error(error);
+        return { status: 500, message: "Internal Server Error", error: error.message };
+    }
+}
+
 export async function saveTempPasswordService(tempPass, email) {
     if (tempPass === null || email === undefined) {
         return { status: 400, message: "fields cannot be null" };

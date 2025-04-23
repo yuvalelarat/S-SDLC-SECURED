@@ -1,55 +1,105 @@
-import React, { useState } from "react";
-import { TextField } from "../components/textField";
-import { WhiteCard } from "../components/whiteCard";
-import { validateEmail } from "../auth/validateEmail";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { TextField } from '../components/textField';
+import { WhiteCard } from '../components/whiteCard';
+import { validateEmail } from '../auth/validateEmail';
+import { useNavigate } from 'react-router-dom';
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [isTempPass, setIsTempPass] = useState<boolean>(false);
+  const [tempPass, setTempPass] = useState<string>('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitEmail = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateEmail(email)) {
-      setError("Invalid email format.");
+      setError('Invalid email format.');
       return;
     }
 
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/forgot-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        'http://localhost:3000/api/auth/forgot-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       if (response.ok) {
-        console.log(`[ForgotPassword] Reset token sent successfully to email: ${email}`);
-        alert("Reset token sent to your email.");
+        console.log(
+          `[ForgotPassword] Reset token sent successfully to email: ${email}`
+        );
+        alert('Reset token sent to your email.');
+        setIsTempPass(true);
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Failed to send reset token.");
+        setError(errorData.message || 'Failed to send reset token.');
       }
     } catch (err) {
-      console.error('[ForgotPassword] An error occurred while sending reset token:', err);
-      setError("An error occurred. Please try again.");
+      console.error(
+        '[ForgotPassword] An error occurred while sending reset token:',
+        err
+      );
+      setError('An error occurred. Please try again.');
     }
   };
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
+  const handleSubmitTempPass = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateEmail(email)) {
+      setError('Invalid email format.');
+      return;
+    }
+
+    if (!tempPass) {
+      setError('Please provide the string that you got in the mail.');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        'http://localhost:3000/api/auth/check-temp-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ tempPass, email }),
+        }
+      );
+
+      if (response.ok) {
+        setError(null);
+        navigate('/reset-password', { state: { email, tempPass } });
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to continue to reset password.');
+      }
+    } catch (err) {
+      console.error('[ForgotPassword] An error occurred:', err);
+      setError('An error occurred. Please try again.');
+    }
+  };
   if (token) {
     return (
       <WhiteCard>
-        <h2 className="text-2xl font-bold pb-4 text-black text-center">You are already logged in!</h2>
+        <h2 className="text-2xl font-bold pb-4 text-black text-center">
+          You are already logged in!
+        </h2>
         <p
           className="text-blue-500 text-md text-center hover:cursor-pointer p-1"
-          onClick={() => navigate("/")}
+          onClick={() => navigate('/')}
         >
           Go to home page.
         </p>
@@ -60,8 +110,8 @@ export default function ForgotPassword() {
   return (
     <WhiteCard>
       <h2 className="text-2xl font-bold pb-4 text-black">Reset password</h2>
-      <form>
-        <div className={error ? "pt-4" : "py-4"}>
+      <form onSubmit={isTempPass ? handleSubmitTempPass : handleSubmitEmail}>
+        <div className={error ? 'pt-4' : 'py-4'}>
           <TextField
             placeholder="Email"
             containerStyle="mb-4"
@@ -69,14 +119,22 @@ export default function ForgotPassword() {
             onChange={(e) => setEmail(e.target.value)}
             type="email"
           />
+          {isTempPass && (
+            <TextField
+              placeholder="Token"
+              containerStyle="mb-4"
+              textFieldStyle="mb-4"
+              onChange={(e) => setTempPass(e.target.value)}
+              type="token"
+            />
+          )}
           <div className="min-h-5 pb-4">
-            {<p className="text-red-500 text-sm">{`${error ? error : ""}`}</p>}
+            {<p className="text-red-500 text-sm">{`${error ? error : ''}`}</p>}
           </div>
         </div>
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer"
-          onClick={handleSubmit}
         >
           Submit
         </button>

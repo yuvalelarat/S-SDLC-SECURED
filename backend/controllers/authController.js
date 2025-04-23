@@ -1,4 +1,4 @@
-import { registerService, loginService, resetPasswordService,saveTempPasswordService, checkTempPasswordService } from "../services/authService.js";
+import { registerService, loginService, resetPasswordService, saveTempPasswordService, checkTempPasswordService, resetPasswordNoTokenService } from "../services/authService.js";
 import { validatePassword } from "../utils/validatePassword.js";
 import { validateEmail } from "../utils/validateEmail.js";
 import { decodeToken } from "../utils/JWTutils.js";
@@ -93,6 +93,20 @@ export const resetPassword = async (req, res) => {
   }
 
   const result = await resetPasswordService(userName, oldPassword, newPassword);
+  res.status(result.status).json(result);
+};
+
+export const resetPasswordWithoutToken = async (req, res) => {
+  const { email, tempPass, newPassword } = req.body;
+  if (!email || !tempPass) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (!newPassword) {
+    return res.status(400).json({ message: "Please fill in the field" });
+  }
+
+  const result = await resetPasswordNoTokenService(email, newPassword);
   res.status(result.status).json(result);
 };
 
