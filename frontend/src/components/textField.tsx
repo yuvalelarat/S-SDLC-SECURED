@@ -5,6 +5,7 @@ interface TextFieldProps {
   placeholder?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
+  value?: string;
 }
 
 export function TextField(props: TextFieldProps) {
@@ -15,6 +16,7 @@ export function TextField(props: TextFieldProps) {
     placeholder = "",
     onChange,
     type = "text",
+    value
   } = props;
   return (
     <div className={` ${containerStyle}`}>
@@ -24,6 +26,7 @@ export function TextField(props: TextFieldProps) {
           className={`w-full h-8 p-2 text-black focus:ring-2 focus:ring-transparent outline-none ${inputStyle}`}
           placeholder={placeholder}
           onChange={onChange}
+          value={value}
         />
       </div>
     </div>

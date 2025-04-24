@@ -143,7 +143,7 @@ export default function ForgotPassword() {
         </div>
         <button
           type="submit"
-          className={`w-full bg-blue-500 text-white py-2 rounded ${isLoading ? '' : 'hover:bg-blue-600 hover:cursor-pointer'} `}
+          className={`w-full text-white py-2 rounded ${isLoading ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-600 hover:cursor-pointer '} `}
           disabled={isLoading}
         >
           Submit
