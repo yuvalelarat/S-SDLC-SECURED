@@ -54,7 +54,10 @@ export const forgotPassword = async (req, res) => {
     return res.status(400).json({ message: "Email is not valid." });
   }
 
-  const tempPass = crypto.createHash("sha1").update(email).digest("hex");
+  const tempPass = crypto.createHash("sha1")
+  .update(email + crypto.randomBytes(16).toString("hex"))
+  .digest("hex");
+
   try {
     await sendEmail(email, tempPass);
 
