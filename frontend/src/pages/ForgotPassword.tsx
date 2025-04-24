@@ -10,6 +10,7 @@ export default function ForgotPassword() {
   const navigate = useNavigate();
   const [isTempPass, setIsTempPass] = useState<boolean>(false);
   const [tempPass, setTempPass] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmitEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,7 @@ export default function ForgotPassword() {
     setError(null);
 
     try {
+      setIsLoading(true);
       const response = await fetch(
         'http://localhost:3000/api/auth/forgot-password',
         {
@@ -39,9 +41,11 @@ export default function ForgotPassword() {
         );
         alert('Reset token sent to your email.');
         setIsTempPass(true);
+        setIsLoading(false);
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'Failed to send reset token.');
+        setIsLoading(false);
       }
     } catch (err) {
       console.error(
@@ -49,6 +53,7 @@ export default function ForgotPassword() {
         err
       );
       setError('An error occurred. Please try again.');
+      setIsLoading(false);
     }
   };
 
@@ -68,6 +73,7 @@ export default function ForgotPassword() {
     }
 
     try {
+      setIsLoading(true);
       const response = await fetch(
         'http://localhost:3000/api/auth/check-temp-password',
         {
@@ -82,13 +88,16 @@ export default function ForgotPassword() {
       if (response.ok) {
         setError(null);
         navigate('/reset-password', { state: { email, tempPass } });
+        setIsLoading(false);
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'Failed to continue to reset password.');
+        setIsLoading(false);
       }
     } catch (err) {
       console.error('[ForgotPassword] An error occurred:', err);
       setError('An error occurred. Please try again.');
+      setIsLoading(false);
     }
   };
   if (token) {
@@ -134,7 +143,8 @@ export default function ForgotPassword() {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer"
+          className={`w-full bg-blue-500 text-white py-2 rounded ${isLoading ? '' : 'hover:bg-blue-600 hover:cursor-pointer'} `}
+          disabled={isLoading}
         >
           Submit
         </button>

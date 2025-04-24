@@ -53,7 +53,6 @@ export default function ResetPassword() {
   };
 
   const handleResetTempPass = async (e: React.FormEvent) => {
-    console.log('DASDASDASDASD');
     e.preventDefault();
 
     const response = await fetch(
