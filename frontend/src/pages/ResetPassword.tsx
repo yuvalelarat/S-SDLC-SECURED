@@ -81,7 +81,7 @@ export default function ResetPassword() {
         {!tempPass && !email && (
           <div className="py-4">
             <TextField
-              placeholder="Old Password"
+              placeholder="Current Password"
               containerStyle="mb-4"
               textFieldStyle="mb-4"
               onChange={(e) => setOldPassword(e.target.value)}

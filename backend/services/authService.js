@@ -66,9 +66,9 @@ export async function registerService(userName, email, password) {
     }
 }
 
-export async function resetPasswordService(userName, oldPassword, newPassword) {
-    if (oldPassword === newPassword) {
-        return { status: 400, message: "New password cannot be the same as the old password" };
+export async function resetPasswordService(userName, currentPassword, newPassword) {
+    if (currentPassword === newPassword) {
+        return { status: 400, message: "New password cannot be the same as the current password" };
     }
 
     const validationResult = validatePassword(newPassword);
@@ -122,7 +122,7 @@ export async function resetPasswordNoTokenService(email, newPassword) {
         const isSamePassword = await bcrypt.compare(newPassword, user.password);
 
         if (isSamePassword) {
-            return { status: 400, message: "New password cannot be the same as the old password" };
+            return { status: 400, message: "New password cannot be the same as the current password" };
         }
 
         user.password = hashedPassword;
