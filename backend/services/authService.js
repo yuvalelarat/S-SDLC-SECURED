@@ -3,6 +3,7 @@ import { AppDataSource } from "../config/data-source.js";
 import User from "../models/userModel.js";
 import { generateToken } from "../utils/JWTutils.js";
 import { validatePassword } from "../utils/validatePassword.js";
+import { passwordConfig } from '../utils/passwordConfig.js';
 
 export async function loginService(userName, password) {
     try {
@@ -84,9 +85,28 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
             return { status: 404, message: "User not found" };
         }
 
+        const passwordList = user.passwordList;
+
         const saltRounds = 10;
         const salt = await bcrypt.genSalt(saltRounds);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        if (passwordList) {
+            for (let i = 0; i < passwordConfig.password_history; i++) {
+                if (passwordList[i]) {
+                    const matchedPasswords = await bcrypt.compare(newPassword, passwordList[i].oldPass)
+                    if (matchedPasswords) return { status: 400, message: "New password cannot be the same as old passwords" };
+                }
+            }
+        }
+
+        const movePassword = user.password
+
+        if (passwordList) {
+            passwordList.unshift({ oldPass: movePassword })
+        } else {
+            user.passwordList = [{ oldPass: movePassword }]
+        }
 
         user.password = hashedPassword;
         user.salt = salt;

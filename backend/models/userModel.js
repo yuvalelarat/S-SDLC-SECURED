@@ -32,6 +32,10 @@ const User = new EntitySchema({
       length: 255,
       nullable: true,
     },
+    passwordList: {
+      type: "simple-json",
+      nullable: true,
+    },
   },
 });
 
