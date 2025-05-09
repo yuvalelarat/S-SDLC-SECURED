@@ -36,6 +36,14 @@ const User = new EntitySchema({
       type: "simple-json",
       nullable: true,
     },
+    loginAttempts: {
+      type: "int",
+      default: 0,
+    },
+    loginTimeOut: {
+      type: "timestamp",
+      nullable: true,
+    }
   },
 });
 
