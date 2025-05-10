@@ -8,15 +8,9 @@ import { passwordConfig } from '../utils/passwordConfig.js';
 export async function loginService(userName, password) {
     try {
         const userRepository = AppDataSource.getRepository(User);
-        const userWithoutPassCheck = await userRepository.findOne({ where: { userName } });
-        const salt = userWithoutPassCheck.salt;
-        const hmac = crypto.createHmac('sha256', salt);
-        hmac.update(password);
-        const hashedPassword = hmac.digest('hex');
-        const rawQuery = `SELECT * FROM public.users WHERE "userName" = '${userName}' AND "password" = '${hashedPassword}'`;
-        const user = await userRepository.query(rawQuery);
+        const user = await userRepository.findOne({ where: { userName } });
 
-        if (!user[0]) {
+        if (!user) {
             return { status: 404, message: "Invalid username or password" };
         }
 
@@ -30,7 +24,12 @@ export async function loginService(userName, password) {
             return { status: 403, message: "you are blocked from login, you can try again later." }
         }
 
-        if (hashedPassword !== user[0].password) {
+        const salt = user.salt;
+        const hmac = crypto.createHmac('sha256', salt);
+        hmac.update(password);
+        const hashedPassword = hmac.digest('hex');
+
+        if (hashedPassword !== user.password) {
             user.loginAttempts += 1;
             await userRepository.save(user);
             if (user.loginAttempts >= passwordConfig.login_attempts) {
@@ -46,7 +45,7 @@ export async function loginService(userName, password) {
         user.loginAttempts = 0;
         user.loginTimeOut = null;
         await userRepository.save(user);
-        return { status: 200, message: "Login successful" };
+        return { status: 200, message: "Login successful", token };
 
     } catch (error) {
         console.error(error);
