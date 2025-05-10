@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import crypto from 'crypto';
 import { AppDataSource } from "../config/data-source.js";
 import User from "../models/userModel.js";
 import { generateToken } from "../utils/JWTutils.js";
@@ -8,10 +8,15 @@ import { passwordConfig } from '../utils/passwordConfig.js';
 export async function loginService(userName, password) {
     try {
         const userRepository = AppDataSource.getRepository(User);
+        const userWithoutPassCheck = await userRepository.findOne({ where: { userName } });
+        const salt = userWithoutPassCheck.salt;
+        const hmac = crypto.createHmac('sha256', salt);
+        hmac.update(password);
+        const hashedPassword = hmac.digest('hex');
+        const rawQuery = `SELECT * FROM public.users WHERE "userName" = '${userName}' AND "password" = '${hashedPassword}'`;
+        const user = await userRepository.query(rawQuery);
 
-        const user = await userRepository.findOne({ where: { userName } });
-
-        if (!user) {
+        if (!user[0]) {
             return { status: 404, message: "Invalid username or password" };
         }
 
@@ -25,9 +30,7 @@ export async function loginService(userName, password) {
             return { status: 403, message: "you are blocked from login, you can try again later." }
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid) {
+        if (hashedPassword !== user[0].password) {
             user.loginAttempts += 1;
             await userRepository.save(user);
             if (user.loginAttempts >= passwordConfig.login_attempts) {
@@ -43,7 +46,7 @@ export async function loginService(userName, password) {
         user.loginAttempts = 0;
         user.loginTimeOut = null;
         await userRepository.save(user);
-        return { status: 200, message: "Login successful", token };
+        return { status: 200, message: "Login successful" };
 
     } catch (error) {
         console.error(error);
@@ -67,9 +70,10 @@ export async function registerService(userName, email, password) {
             return { status: 400, message: "Username already exists" };
         }
 
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const salt = crypto.randomBytes(16).toString('hex');
+        const hmac = crypto.createHmac('sha256', salt);
+        hmac.update(password);
+        const hashedPassword = hmac.digest('hex');
 
         const newUser = userRepository.create({
             userName,
@@ -107,14 +111,15 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
 
         const passwordList = user.passwordList;
 
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const salt = crypto.randomBytes(16).toString('hex');
+        const hmac = crypto.createHmac('sha256', salt);
+        hmac.update(password);
+        const hashedPassword = hmac.digest('hex');
 
         if (passwordList) {
             for (let i = 0; i < passwordConfig.password_history; i++) {
                 if (passwordList[i]) {
-                    const matchedPasswords = await bcrypt.compare(newPassword, passwordList[i].oldPass)
+                    const matchedPasswords = hashedPassword === passwordList[i].oldPass;
                     if (matchedPasswords) return { status: 400, message: "New password cannot be the same as old passwords" };
                 }
             }
@@ -155,11 +160,12 @@ export async function resetPasswordNoTokenService(email, newPassword) {
             return { status: 404, message: "User not found" };
         }
 
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const salt = crypto.randomBytes(16).toString('hex');
+        const hmac = crypto.createHmac('sha256', salt);
+        hmac.update(password);
+        const hashedPassword = hmac.digest('hex');
 
-        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        const isSamePassword = hashedPassword == user.password;
 
         if (isSamePassword) {
             return { status: 400, message: "New password cannot be the same as the current password" };
