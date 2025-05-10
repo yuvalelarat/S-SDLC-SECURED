@@ -16,7 +16,7 @@ export default function HomePage() {
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
-    if(token) {
+    if (token) {
       fetchClients();
     }
   }, [token]);
@@ -34,7 +34,7 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json();
         console.log("Clients fetched successfully:", data);
-        if(data.clients) {
+        if (data.clients) {
           setClients(data.clients);
         }
       }
@@ -74,6 +74,15 @@ export default function HomePage() {
       setIsLoading(false);
     }
   };
+
+  const escapeHTML = (str: string) => {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
   return (
     <div className="mt-20 justify-center items-center flex flex-col">
@@ -116,9 +125,9 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-6 mt-10 justify-items-center">
           {clients.map((client, index) => (
             <WhiteCard key={index} middle={false}>
-              <p className="font-bold">{client.name}</p>
-              <p className="font-bold">{client.email}</p>
-              <p className="font-bold">{client.phoneNumber}</p>
+              <p className="font-bold">{escapeHTML(client.name)}</p>
+              <p className="font-bold">{escapeHTML(client.email)}</p>
+              <p className="font-bold">{escapeHTML(client.phoneNumber)}</p>
             </WhiteCard>
           ))}
         </div>
