@@ -15,7 +15,7 @@ export async function sendEmail(to, tempPass) {
 
     if (!user) {
         console.error(`[sendEmail] User not found for email: ${to}`);
-        return { success: false, status: 404, message: 'User not found' };
+        return { success: false, status: 404, message: 'Email not found' };
     }
 
     const { EMAIL_USER, EMAIL_PASS } = process.env;
