@@ -59,8 +59,11 @@ export const forgotPassword = async (req, res) => {
   .digest("hex");
 
   try {
-    await sendEmail(email, tempPass);
+      const emailResult = await sendEmail(email, tempPass);
 
+  if (!emailResult.success) {
+    return res.status(emailResult.status || 500).json({ message: emailResult.message || 'Email sending failed' });
+  }
     await saveTempPasswordService(tempPass, email);
 
     res.status(200).json({ message: "Password reset email sent successfully." });

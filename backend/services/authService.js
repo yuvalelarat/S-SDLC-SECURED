@@ -111,6 +111,11 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
         const salt = await bcrypt.genSalt(saltRounds);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
+        const currentPasswordDiff = await bcrypt.compare(currentPassword, user.password);
+        if (!currentPasswordDiff) {
+            return { status: 400, message: "Current password is incorrect" };
+        }
+
         if (passwordList) {
             for (let i = 0; i < passwordConfig.password_history; i++) {
                 if (passwordList[i]) {
@@ -163,6 +168,25 @@ export async function resetPasswordNoTokenService(email, newPassword) {
 
         if (isSamePassword) {
             return { status: 400, message: "New password cannot be the same as the current password" };
+        }
+
+        const passwordList = user.passwordList;
+
+        if (passwordList) {
+            for (let i = 0; i < passwordConfig.password_history; i++) {
+                if (passwordList[i]) {
+                    const matchedPasswords = await bcrypt.compare(newPassword, passwordList[i].oldPass)
+                    if (matchedPasswords) return { status: 400, message: "New password cannot be the same as old passwords" };
+                }
+            }
+        }
+
+        const movePassword = user.password
+
+        if (passwordList) {
+            passwordList.unshift({ oldPass: movePassword })
+        } else {
+            user.passwordList = [{ oldPass: movePassword }]
         }
 
         user.password = hashedPassword;
