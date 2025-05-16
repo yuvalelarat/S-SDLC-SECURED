@@ -9,20 +9,26 @@ export async function loginService(userName, password) {
     try {
         const userRepository = AppDataSource.getRepository(User);
 
-        const user = await userRepository.findOne({ where: { userName } });
+        const users = await userRepository.query(
+            `SELECT * FROM public.users WHERE "userName" = $1`,
+            [userName]
+        );
+
+        const user = users[0];
 
         if (!user) {
             return { status: 404, message: "Invalid username or password" };
         }
 
-        if (user.loginTimeOut <= new Date(Date.now() - 15 * 60 * 1000) && (user.loginAttempts >= passwordConfig.login_attempts)) {
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+        if (user.loginTimeOut <= fifteenMinutesAgo && user.loginAttempts >= passwordConfig.login_attempts) {
             user.loginAttempts = 0;
             user.loginTimeOut = null;
             await userRepository.save(user);
         }
 
         if (user.loginAttempts >= passwordConfig.login_attempts) {
-            return { status: 403, message: "you are blocked from login, you can try again later." }
+            return { status: 403, message: "you are blocked from login, you can try again later." };
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -33,7 +39,7 @@ export async function loginService(userName, password) {
             if (user.loginAttempts >= passwordConfig.login_attempts) {
                 user.loginTimeOut = new Date();
                 await userRepository.save(user);
-                return { status: 403, message: "you are blocked from login, you can try again later." }
+                return { status: 403, message: "you are blocked from login, you can try again later." };
             }
             return { status: 400, message: "Invalid username or password" };
         }
@@ -43,6 +49,7 @@ export async function loginService(userName, password) {
         user.loginAttempts = 0;
         user.loginTimeOut = null;
         await userRepository.save(user);
+
         return { status: 200, message: "Login successful", token };
 
     } catch (error) {
@@ -51,19 +58,22 @@ export async function loginService(userName, password) {
     }
 }
 
+
 export async function registerService(userName, email, password) {
     try {
         const userRepository = AppDataSource.getRepository(User);
 
-        const nonUniqueEmail = await userRepository.findOne({ where: { email } });
+        const emailCheckQuery = `SELECT * FROM public.users WHERE "email" = $1`;
+        const existingEmails = await userRepository.query(emailCheckQuery, [email]);
 
-        if (nonUniqueEmail) {
+        if (existingEmails.length > 0) {
             return { status: 400, message: "Email already exists" };
         }
 
-        const nonUniqueUserName = await userRepository.findOne({ where: { userName } });
+        const userNameCheckQuery = `SELECT * FROM public.users WHERE "userName" = $1`;
+        const existingUserNames = await userRepository.query(userNameCheckQuery, [userName]);
 
-        if (nonUniqueUserName) {
+        if (existingUserNames.length > 0) {
             return { status: 400, message: "Username already exists" };
         }
 
@@ -81,11 +91,13 @@ export async function registerService(userName, email, password) {
         await userRepository.save(newUser);
 
         return { status: 201, message: "User registered successfully" };
+
     } catch (error) {
         console.error(error);
         return { status: 500, message: "Internal Server Error", error: error.message };
     }
 }
+
 
 export async function resetPasswordService(userName, currentPassword, newPassword) {
     if (currentPassword === newPassword) {

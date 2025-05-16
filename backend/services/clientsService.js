@@ -6,9 +6,12 @@ export async function createClientService(clientData) {
     try {
         const clientRepository = AppDataSource.getRepository(Client);
 
-        const existingClient = await clientRepository.findOne({ where: { email } });
+        const existingClients = await clientRepository.query(
+            `SELECT * FROM public.client WHERE "email" = $1`,
+            [email]
+        );
 
-        if (existingClient) {
+        if (existingClients.length > 0) {
             return { status: 400, message: "Client already exists" };
         }
 
