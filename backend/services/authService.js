@@ -139,7 +139,7 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
             return { status: 400, message: "Current password is incorrect" };
         }
 
-        if (passwordList) {
+        if (passwordList.length > 0) {
             for (let i = 0; i < passwordConfig.password_history; i++) {
                 if (passwordList[i]) {
                     const matchedPasswords = await bcrypt.compare(newPassword, passwordList[i].oldPass)
@@ -150,7 +150,7 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
 
         const movePassword = user.password
 
-        if (passwordList) {
+        if (passwordList.length > 0) {
             passwordList.unshift({ oldPass: movePassword })
         } else {
             user.passwordList = [{ oldPass: movePassword }]
@@ -193,9 +193,20 @@ export async function resetPasswordNoTokenService(email, newPassword) {
             return { status: 400, message: "New password cannot be the same as the current password" };
         }
 
-        const passwordList = user.passwordList;
+        let passwordList = user.passwordList;
 
-        if (passwordList) {
+        if (!passwordList) passwordList = []
+
+        if (typeof passwordList === 'string') {
+            try {
+                passwordList = JSON.parse(passwordList);
+            } catch (error) {
+                console.error("Error parsing passwordList:", error);
+                return { status: 500, message: "Internal Server Error" };
+            }
+        }
+
+        if (passwordList.length > 0) {
             for (let i = 0; i < passwordConfig.password_history; i++) {
                 if (passwordList[i]) {
                     const matchedPasswords = await bcrypt.compare(newPassword, passwordList[i].oldPass)
@@ -206,7 +217,7 @@ export async function resetPasswordNoTokenService(email, newPassword) {
 
         const movePassword = user.password
 
-        if (passwordList) {
+        if (passwordList.length > 0) {
             passwordList.unshift({ oldPass: movePassword })
         } else {
             user.passwordList = [{ oldPass: movePassword }]
