@@ -117,7 +117,18 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
             return { status: 404, message: "User not found" };
         }
 
-        const passwordList = user.passwordList;
+        let passwordList = user.passwordList;
+
+        if (!passwordList) passwordList = []
+
+        if (typeof passwordList === 'string') {
+            try {
+                passwordList = JSON.parse(passwordList);
+            } catch (error) {
+                console.error("Error parsing passwordList:", error);
+                return { status: 500, message: "Internal Server Error" };
+            }
+        }
 
         const saltRounds = 10;
         const salt = await bcrypt.genSalt(saltRounds);
