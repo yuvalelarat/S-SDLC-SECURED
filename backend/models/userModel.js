@@ -33,7 +33,7 @@ const User = new EntitySchema({
       nullable: true,
     },
     passwordList: {
-      type: "simple-json",
+      type: "jsonb",
       nullable: true,
     },
     loginAttempts: {
