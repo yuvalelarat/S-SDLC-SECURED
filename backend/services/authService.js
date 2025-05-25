@@ -20,8 +20,8 @@ export async function loginService(userName, password) {
             return { status: 404, message: "Invalid username or password" };
         }
 
-        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-        if (user.loginTimeOut <= fifteenMinutesAgo && user.loginAttempts >= passwordConfig.login_attempts) {
+        const fifteenMinutesAgo = new Date(Date.now() + 15 * 60 * 1000);
+        if (user.loginTimeOut && user.loginTimeOut > fifteenMinutesAgo && user.loginAttempts >= passwordConfig.login_attempts) {
             user.loginAttempts = 0;
             user.loginTimeOut = null;
             await userRepository.save(user);
@@ -32,7 +32,7 @@ export async function loginService(userName, password) {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-
+        
         if (!isPasswordValid) {
             user.loginAttempts += 1;
             await userRepository.save(user);
