@@ -3,6 +3,9 @@ import Client from "../models/clientModels.js";
 
 export async function createClientService(clientData) {
     const { name, email, phoneNumber } = clientData;
+    if (!/^(\+972|0)?[2-9]\d{7,8}$/.test(phoneNumber)) {
+        return { status: 400, message: "Phone number input is incorrect" };
+    }
     try {
         const clientRepository = AppDataSource.getRepository(Client);
 
@@ -13,6 +16,15 @@ export async function createClientService(clientData) {
 
         if (existingClients.length > 0) {
             return { status: 400, message: "Client already exists" };
+        }
+
+        const existingPhone = await clientRepository.query(
+            `SELECT * FROM public.client WHERE "phoneNumber" = $1`,
+            [phoneNumber]
+        );
+
+        if (existingPhone.length > 0) {
+            return { status: 400, message: "Phone number already exists" };
         }
 
         const newClient = clientRepository.create({
