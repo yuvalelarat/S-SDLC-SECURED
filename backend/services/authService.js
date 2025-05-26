@@ -1,9 +1,13 @@
-import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { AppDataSource } from "../config/data-source.js";
 import User from "../models/userModel.js";
 import { generateToken } from "../utils/JWTutils.js";
-import { validatePassword } from "../utils/validatePassword.js";
+import { validatePassword, checkSamePasswords } from "../utils/validatePassword.js";
 import { passwordConfig } from '../utils/passwordConfig.js';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const secretKey = process.env.SECRET_KEY;
 
 export async function loginService(userName, password) {
     try {
@@ -31,9 +35,9 @@ export async function loginService(userName, password) {
             return { status: 403, message: "you are blocked from login, you can try again later." };
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isSamePass = checkSamePasswords(password, user.salt, user.password, secretKey);
         
-        if (!isPasswordValid) {
+        if (!isSamePass) {
             user.loginAttempts += 1;
             await userRepository.save(user);
             if (user.loginAttempts >= passwordConfig.login_attempts) {
@@ -77,9 +81,13 @@ export async function registerService(userName, email, password) {
             return { status: 400, message: "Username already exists" };
         }
 
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const pass = password;
+        const salt = crypto.randomBytes(16).toString('hex');
+        const combinedPassword = pass + salt;
+
+        const hmac = crypto.createHmac('sha256', secretKey);
+        hmac.update(combinedPassword);
+        const hashedPassword = hmac.digest('hex');
 
         const newUser = userRepository.create({
             userName,
@@ -100,9 +108,6 @@ export async function registerService(userName, email, password) {
 
 
 export async function resetPasswordService(userName, currentPassword, newPassword) {
-    if (currentPassword === newPassword) {
-        return { status: 400, message: "New password cannot be the same as the current password" };
-    }
 
     const validationResult = validatePassword(newPassword);
     if (validationResult !== null) {
@@ -115,6 +120,18 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
 
         if (!user) {
             return { status: 404, message: "User not found" };
+        }
+
+        const isCurrentPasswordCorrect = checkSamePasswords(currentPassword, user.salt, user.password, secretKey);
+
+        if (!isCurrentPasswordCorrect) {
+            return { status: 400, message: "Current password is incorrect" };
+        }
+
+        const isNewPassSamePass = checkSamePasswords(newPassword, user.salt, user.password, secretKey);
+
+        if (isNewPassSamePass) {
+            return { status: 400, message: "New password cannot be the same as old passwords" };
         }
 
         let passwordList = user.passwordList;
@@ -130,31 +147,30 @@ export async function resetPasswordService(userName, currentPassword, newPasswor
             }
         }
 
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-        const currentPasswordDiff = await bcrypt.compare(currentPassword, user.password);
-        if (!currentPasswordDiff) {
-            return { status: 400, message: "Current password is incorrect" };
-        }
-
         if (passwordList.length > 0) {
             for (let i = 0; i < passwordConfig.password_history; i++) {
                 if (passwordList[i]) {
-                    const matchedPasswords = await bcrypt.compare(newPassword, passwordList[i].oldPass)
+                    console.log("Checking password history for match:", passwordList[i].oldPass);
+                    const matchedPasswords = checkSamePasswords(newPassword, passwordList[i].oldSalt, passwordList[i].oldPass, secretKey);
+                    console.log("Matched passwords:", matchedPasswords);
                     if (matchedPasswords) return { status: 400, message: "New password cannot be the same as old passwords" };
                 }
             }
         }
 
-        const movePassword = user.password
-
         if (passwordList.length > 0) {
-            passwordList.unshift({ oldPass: movePassword })
+            passwordList.unshift({ oldPass: user.password, oldSalt: user.salt })
         } else {
-            user.passwordList = [{ oldPass: movePassword }]
+            user.passwordList = [{ oldPass: user.password, oldSalt: user.salt }]
         }
+
+        const pass = newPassword;
+        const salt = crypto.randomBytes(16).toString('hex');
+        const combinedPassword = pass + salt;
+
+        const hmac = crypto.createHmac('sha256', secretKey);
+        hmac.update(combinedPassword);
+        const hashedPassword = hmac.digest('hex');
 
         user.password = hashedPassword;
         user.salt = salt;
@@ -183,45 +199,39 @@ export async function resetPasswordNoTokenService(email, newPassword) {
             return { status: 404, message: "User not found" };
         }
 
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const isSamePass = checkSamePasswords(newPassword, user.salt, user.password, secretKey);
 
-        const isSamePassword = await bcrypt.compare(newPassword, user.password);
-
-        if (isSamePassword) {
-            return { status: 400, message: "New password cannot be the same as the current password" };
+        if (isSamePass) {
+            return { status: 400, message: "New password cannot be the same as old passwords" };
         }
 
         let passwordList = user.passwordList;
 
         if (!passwordList) passwordList = []
 
-        if (typeof passwordList === 'string') {
-            try {
-                passwordList = JSON.parse(passwordList);
-            } catch (error) {
-                console.error("Error parsing passwordList:", error);
-                return { status: 500, message: "Internal Server Error" };
-            }
-        }
-
         if (passwordList.length > 0) {
             for (let i = 0; i < passwordConfig.password_history; i++) {
                 if (passwordList[i]) {
-                    const matchedPasswords = await bcrypt.compare(newPassword, passwordList[i].oldPass)
+                    const matchedPasswords = checkSamePasswords(newPassword, passwordList[i].oldSalt, passwordList[i].oldPass, secretKey);
                     if (matchedPasswords) return { status: 400, message: "New password cannot be the same as old passwords" };
                 }
             }
         }
 
-        const movePassword = user.password
-
         if (passwordList.length > 0) {
-            passwordList.unshift({ oldPass: movePassword })
+            passwordList.unshift({ oldPass: user.password, oldSalt: user.salt })
         } else {
-            user.passwordList = [{ oldPass: movePassword }]
+            user.passwordList = [{ oldPass: user.password, oldSalt: user.salt }]
         }
+
+        const password = newPassword;
+        const salt = crypto.randomBytes(16).toString('hex');
+
+        const combinedPassword = password + salt;
+
+        const hmac = crypto.createHmac('sha256', secretKey);
+        hmac.update(combinedPassword);
+        const hashedPassword = hmac.digest('hex');
 
         user.password = hashedPassword;
         user.salt = salt;

@@ -1,4 +1,5 @@
 import { passwordConfig } from "./passwordConfig.js";
+import crypto from "crypto";
 
 export const validatePassword = (password) => {
   const { password_length, password_complexity, dictionary_protection } =
@@ -30,3 +31,12 @@ export const validatePassword = (password) => {
 
   return null;
 };
+
+export function checkSamePasswords(inputPassword, storedSalt, storedHashedPassword, secretKey) {
+  const combinedPassword = inputPassword + storedSalt;
+  const hmac = crypto.createHmac('sha256', secretKey);
+  hmac.update(combinedPassword);
+  const inputHashedPassword = hmac.digest('hex');
+
+  return inputHashedPassword === storedHashedPassword;
+}
