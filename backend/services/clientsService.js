@@ -14,7 +14,7 @@ export async function createClientService(clientData) {
             [email, phoneNumber, name]
         );
 
-        if (clientExitsQuery.length > 0) {
+        if (clientExitsQuery?.length > 0) {
             return { status: 400, message: "Client already exists" };
         }
 
