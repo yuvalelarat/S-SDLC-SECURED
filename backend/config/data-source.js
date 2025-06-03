@@ -11,5 +11,5 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || "1234",
   database: process.env.DB_NAME || "project",
   entities: [User, Client],
-  synchronize: true,
+  synchronize: true
 });
