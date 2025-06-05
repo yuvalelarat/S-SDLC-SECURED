@@ -47,7 +47,7 @@ Create a `.env` file inside the `backend/` folder:
 
 ```env
 # JWT secret for authentication
-JWT_SECRET=your_token_secret
+JWT_SECRET=your_jwt_secret
 
 #Secret key for password management
 SECRET_KEY=your_secret_key
