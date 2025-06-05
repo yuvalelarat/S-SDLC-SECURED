@@ -47,10 +47,10 @@ Create a `.env` file inside the `backend/` folder:
 
 ```env
 # JWT secret for authentication
-JWT_SECRET=AsFDSF241@GS
+JWT_SECRET=your_token_secret
 
 #Secret key for password management
-SECRET_KEY=AsFDSF241@GS
+SECRET_KEY=your_secret_key
 
 # Email credentials (for sending the users emails of creating a new password )
 EMAIL_USER=user@email.mail
